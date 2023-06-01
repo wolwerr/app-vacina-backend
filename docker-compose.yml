@@ -1,0 +1,48 @@
+version: '3.9'
+services:
+
+  server:
+    container_name: app_vacina
+    build: ./
+    restart: on-failure
+    ports:
+      - 3001:3001
+    platform: linux/x86_64
+    environment:
+      - POSTGRES_DATABASE=vacina
+      - HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - db
+    networks:
+      - postgres-compose-network
+
+  db:
+    image: postgres:14.1-alpine
+    container_name: postgres_db
+    platform: linux/x86_64
+    ports:
+      - 3002:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: on-failure
+    networks:
+      - postgres-compose-network
+
+  pgadmin-compose:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "vacina@vacina.com.br"
+      PGADMIN_DEFAULT_PASSWORD: "123"
+    ports:
+      - "16543:80"
+    depends_on:
+      - db
+    networks:
+      - postgres-compose-network
+
+networks: 
+  postgres-compose-network:
+    driver: bridge
